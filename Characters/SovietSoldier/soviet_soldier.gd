@@ -1,59 +1,68 @@
 extends AnimatableBody2D
-# NPC properties
-@export var movement_speed = 50.0
-@export var side_length = 100.0  # Length of each side of the square
-# Path variables
-var current_side = 0  # 0: right, 1: down, 2: left, 3: up
-var side_progress = 0.0
-var start_position = Vector2.ZERO
-var target_position = Vector2.ZERO
+
+
+@export var MOVEMENT_SPEED = 50.0
+@export var WAIT_TIME := 1.0
+
+# Places the guard will stop
+var path = [
+	Vector2(4, 1) * 16, # Spawn
+	Vector2(9, 1) * 16, # Move right, look down
+	Vector2(14, 1) * 16, # Move left
+	Vector2(9, 1) * 16 # Move left, look down
+]
+
+var current_target_index = 1
+var is_waiting = false
+var wait_timer = 0.0
 
 func _ready():
-	# Save initial position
-	start_position = global_position
-	target_position = global_position
-	# Start with right animation
-	$AnimatedSprite2D.play("right")
+	set_deferred("global_position", path[0])
+	current_target_index = 1
+	$AnimatedSprite2D.play("idle")
+
 
 func _physics_process(delta):
-	# Calculate target position based on current side
-	match current_side:
-		0: target_position = start_position + Vector2(side_length, 0)  # Right
-		1: target_position = start_position + Vector2(side_length, side_length)  # Down
-		2: target_position = start_position + Vector2(0, side_length)  # Left
-		3: target_position = start_position  # Up
+	# Check if the character is idling
+	if is_waiting:
+		wait_timer -= delta
+		# If wait time is up, stop waiting
+		if wait_timer <= 0.0:
+			is_waiting = false
+		else:
+			$AnimatedSprite2D.play("idle")
+		return
 	
-	# Move towards target position
-	var direction = (target_position - global_position).normalized()
-	var distance_to_move = movement_speed * delta
-	var distance_to_target = global_position.distance_to(target_position)
+	# Loop back to the start when reached all points
+	if current_target_index >= path.size():
+		current_target_index = 0  
 	
+	# Calculate path intention
+	var target = path[current_target_index]
+	var direction = (target - global_position).normalized()
+	var distance_to_move = MOVEMENT_SPEED * delta
+	var distance_to_target = global_position.distance_to(target)
+
 	if distance_to_target <= distance_to_move:
-		# We've reached the target, move to next corner
-		global_position = target_position
-		current_side = (current_side + 1) % 4
-		
-		# Update animation
-		match current_side:
-			0: $AnimatedSprite2D.play("right")
-			1: $AnimatedSprite2D.play("down")
-			2: $AnimatedSprite2D.play("left")
-			3: $AnimatedSprite2D.play("up")
+		# If the character has reached a point
+		global_position = target
+		# Set movement intention to next point
+		current_target_index += 1
+		# Start idling
+		is_waiting = true
+		wait_timer = WAIT_TIME
 	else:
-		# Move toward target
+		# Character has not reached a point - Move character
 		global_position += direction * distance_to_move
-
-# Optional debugging: visualize the square path
-func _draw():
-	# Draw square path (visible in editor)
-	var points = [
-		Vector2(0, 0),
-		Vector2(side_length, 0),
-		Vector2(side_length, side_length),
-		Vector2(0, side_length),
-		Vector2(0, 0)
-	]
-
-# Call queue_redraw() if you modify side_length at runtime
-func _on_side_length_changed():
-	queue_redraw()
+		
+		# Refresh animation
+		if abs(direction.x) > abs(direction.y):
+			if direction.x > 0:
+				$AnimatedSprite2D.play("right")
+			else:
+				$AnimatedSprite2D.play("left")
+		else:
+			if direction.y > 0:
+				$AnimatedSprite2D.play("down")
+			else:
+				$AnimatedSprite2D.play("up")
