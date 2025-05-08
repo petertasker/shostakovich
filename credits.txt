@@ -1,0 +1,23 @@
+This project is for non-commercial use. For a full liscense, please read the LICENSE
+
+All works not mine have been credited below:
+Access dates are in (DD/MM/YYYY)
+
+Title: 			SHOSTAKOVICH: Symphony No. 5 in D Minor, Op. 47
+Type: 			Audio
+License: 		CC BY-NC-SA 3.0
+Publisher: 		Artur Doszinski
+Link: 			https://archive.org/details/SHOSTAKOVICHSymphonyNo.5-Rodzinski-NEWTRANSFER/01.I.Moderato.mp3 [Accessed 08/05/2025]
+
+Title: 			jsfxr
+Type: 			Audio
+License: 		No liscense
+Publisher(s):	Eric Fredricksen, Chris McCormick
+Link(s):		https://sfxr.me/ [Accessed 08/05/2025]
+				https://github.com/chr15m/jsfxr [Accessed 08/05/2025]
+				
+Title: 			
+Type: 			
+License: 		
+Publisher(s):	
+Link(s):		

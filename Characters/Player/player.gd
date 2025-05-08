@@ -6,6 +6,7 @@ var animation_player
 func _ready():
 	# Get reference to the AnimationPlayer node
 	animation_player = $AnimatedSprite2D 
+	add_to_group("player")
 
 func _physics_process(delta):
 	# Get input direction

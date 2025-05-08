@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b3a3h72vf51jc"]
+
+[ext_resource type="Script" uid="uid://dmmp8qx7u0f7i" path="res://Scenes/GameFlow/game_flow.gd" id="1_74e28"]
+
+[node name="GameFlow" type="Node"]
+script = ExtResource("1_74e28")
