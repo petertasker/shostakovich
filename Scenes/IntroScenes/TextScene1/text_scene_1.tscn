@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dqkiwip5bsr6b"]
+[gd_scene load_steps=3 format=3 uid="uid://dqkiwip5bsr6b"]
 
 [ext_resource type="Texture2D" uid="uid://dwxvnr6tdxgfs" path="res://Words/untitled.png" id="1_5w6db"]
+[ext_resource type="Script" uid="uid://bimuv7hw5npvo" path="res://Scenes/IntroScenes/TextScene1/text_scene_1.gd" id="1_wue5q"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -11,6 +12,7 @@ offset_right = -640.0
 offset_bottom = -360.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_wue5q")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -25,18 +27,43 @@ color = Color(0.0784314, 0.0470588, 0.109804, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
 anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 668.0
-offset_bottom = 185.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 30
+anchor_bottom = 1.86
+offset_left = -90.0
+offset_top = 15.0
+offset_right = 718.0
+offset_bottom = 260.0
+theme_override_constants/margin_left = 100
 theme_override_constants/margin_top = 100
-theme_override_constants/margin_right = 50
+theme_override_constants/margin_right = 100
 theme_override_constants/margin_bottom = 40
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer"]
 layout_mode = 2
 texture = ExtResource("1_5w6db")
+
+[node name="Cover1" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 290.0
+offset_top = 108.0
+offset_right = 490.0
+offset_bottom = 138.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0784314, 0.0470588, 0.109804, 1)
+
+[node name="Cover2" type="Polygon2D" parent="."]
+position = Vector2(-22, 13)
+color = Color(0.0784314, 0.0470588, 0.109804, 1)
+polygon = PackedVector2Array(560, 126, 441.241, 126, 29, 126, 29, 174, 310, 174, 310, 150, 560, 150)
+
+[node name="Cover3" type="Polygon2D" parent="."]
+position = Vector2(-20, 17)
+color = Color(0.0784314, 0.0470588, 0.109804, 1)
+polygon = PackedVector2Array(312, 151, 312, 151, 640, 151, 640, 179, 347, 179, 347, 207, 100, 209, 28, 207, 28, 179, 311, 175)

@@ -6,15 +6,8 @@ func _ready():
 	$MarginContainer/VBoxContainer2/MenuOptions/ExitGame.pressed.connect(_on_ExitButton_pressed)
 
 func _on_PlayButton_pressed():
-	var game_flow_scene = load("res://Scenes/GameFlow/game_flow.tscn")
-	var game_flow_instance = game_flow_scene.instantiate()
-	get_tree().root.add_child(game_flow_instance)
-
-	await game_flow_instance.ready
-	game_flow_instance.start_story()
-
-
-
+	# Use the SceneManager to go to the first text scene
+	SceneManager.go_to_text_scene_1()
 
 # Quit the game
 func _on_ExitButton_pressed():

@@ -2,6 +2,7 @@ extends CharacterBody2D
 
 var speed = 100
 var animation_player
+var current_room = Vector2(0, 0)
 
 func _ready():
 	# Get reference to the AnimationPlayer node
@@ -25,7 +26,7 @@ func _physics_process(delta):
 		direction.y -= 1
 		animation_player.play("up")
 	
-	# Handle diagonal movement (prioritize the last pressed direction for animation)
+	# Handle diagonal movement (prioritise the last pressed direction for animation)
 	if direction.length() > 0:
 		direction = direction.normalized()
 	else:

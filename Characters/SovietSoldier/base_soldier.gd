@@ -1,37 +1,35 @@
 extends AnimatableBody2D
+class_name BaseGuard
 
-const MOVEMENT_SPEED = 50.0
-const WAIT_TIME := 1.5
-const MAX_VIEW_DISTANCE = 200
-const FOV_ANGLE = 30 # degrees
+# Exported Properties (editable per instance in the editor)
+@export var patrol_points: Array[Vector2] = []
+@export var movement_speed: float = 50.0
+@export var wait_time: float = 1.5
+@export var max_view_distance: float = 200.0
+@export var fov_angle: float = 30.0 # degrees
 
-# Places the guard will stop
-var path = [
-	Vector2(9, 4) * 16,
-	Vector2(9, 9) * 16,
-	Vector2(9, 14) * 16,
-	Vector2(9, 9) * 16,
-]
-
-var current_target_index = 1 # The index of which path the soldier wants to go to
+# Internal State
+var path = []
+var current_target_index = 1
 var is_waiting = false
 var wait_timer = 0.0
 var footstep_timer = 0.0
 var idle_animation_phase = 0
 var idle_animation_timer = 0.0
-
 var facing_direction = Vector2.DOWN
-
-var player_detected = false # If player is in Soldiers LOS
+var player_detected = false
 
 func _ready():
-	current_target_index = 1
+	configure()
 	$AnimatedSprite2D.play("idle")
 	$ExclamationMark.visible = false
-	facing_direction = Vector2.DOWN
-	
 	$AnimatedSprite2D.frame_changed.connect(play_step_sound)
 
+# Override this in child classes to customize guard behavior
+func configure():
+	path = []
+	current_target_index = 0
+	facing_direction = Vector2.DOWN
 	
 func _physics_process(delta):
 	# Get player reference and check detection
@@ -67,45 +65,21 @@ func check_player_detection(player):
 		$ExclamationMark.visible = false
 		player_detected = false
 
+# Override this in child classes for custom idle behavior
 func handle_waiting(delta):
-	footstep_timer = 0.0 # Reset footstep timer while idle
-	
-	if path[current_target_index - 1] == Vector2(9, 9) * 16:
-		# Handle idle look sequence at (9,9)
-		idle_animation_timer -= delta
-		if idle_animation_phase == 0:
-			$AnimatedSprite2D.play("idle_left")
-			facing_direction = Vector2.LEFT
-			idle_animation_timer = 1
-			idle_animation_phase = 1
-		elif idle_animation_phase == 1 and idle_animation_timer <= 0.0:
-			$AnimatedSprite2D.play("idle_right")
-			facing_direction = Vector2.RIGHT
-			idle_animation_timer = 1
-			idle_animation_phase = 2
-		elif idle_animation_phase == 2 and idle_animation_timer <= 0.0:
-			is_waiting = false
-			idle_animation_phase = 0
+	footstep_timer = 0.0
+	wait_timer -= delta
+	if wait_timer <= 0.0:
+		is_waiting = false
 	else:
-		wait_timer -= delta
-		if wait_timer <= 0.0:
-			is_waiting = false
-		else:
-			# Use the correct animation based on waypoint
-			if current_target_index == 1:  # First point (9,4)
-				$AnimatedSprite2D.play("idle_down")
-				facing_direction = Vector2.DOWN
-			elif current_target_index == 2:  # Second point (9,9)
-				$AnimatedSprite2D.play("idle_down")
-				facing_direction = Vector2.DOWN
-			elif current_target_index == 3:  # Third point (9,14)
-				$AnimatedSprite2D.play("idle_up")
-				facing_direction = Vector2.UP
-			elif current_target_index == 0:  # Last point, looped back to start
-				$AnimatedSprite2D.play("idle_up")
-				facing_direction = Vector2.UP
+		# Default idle behavior
+		$AnimatedSprite2D.play("idle")
 
 func move_along_path(delta):
+	# Skip if path is empty
+	if path.size() == 0:
+		return
+		
 	# Loop back to the start when reached all points
 	if current_target_index >= path.size():
 		current_target_index = 0
@@ -114,7 +88,7 @@ func move_along_path(delta):
 	# Calculate path intention
 	var target = path[current_target_index]
 	var direction = (target - global_position).normalized()
-	var distance_to_move = MOVEMENT_SPEED * delta
+	var distance_to_move = movement_speed * delta
 	var distance_to_target = global_position.distance_to(target)
 	
 	if distance_to_target <= distance_to_move:
@@ -122,21 +96,20 @@ func move_along_path(delta):
 		global_position = target
 		current_target_index += 1
 		is_waiting = true
-		wait_timer = WAIT_TIME
+		wait_timer = wait_time
 	else:
 		# Move character
 		global_position += direction * distance_to_move
 		update_animation(direction)
-				
 
 func can_see_player(player: Node2D) -> bool:
 	var to_player = player.global_position - global_position
-	if to_player.length() > MAX_VIEW_DISTANCE:
+	if to_player.length() > max_view_distance:
 		return false
 
 	# Use current facing direction to calculate polygon angle
 	var angle = facing_direction.angle_to(to_player.normalized())
-	if abs(rad_to_deg(angle)) > FOV_ANGLE:
+	if abs(rad_to_deg(angle)) > fov_angle:
 		return false
 
 	var space = get_world_2d().direct_space_state
@@ -148,10 +121,9 @@ func can_see_player(player: Node2D) -> bool:
 		return false
 	return true
 
-
 func update_fov_cone():
 	var points = []
-	var half_fov = deg_to_rad(FOV_ANGLE)
+	var half_fov = deg_to_rad(fov_angle)
 	var start_angle = facing_direction.angle() - half_fov
 	var end_angle = facing_direction.angle() + half_fov
 	
@@ -163,7 +135,7 @@ func update_fov_cone():
 	
 	for i in range(segments + 1):
 		var angle = lerp(start_angle, end_angle, float(i) / segments)
-		var ray_end = global_position + Vector2.RIGHT.rotated(angle) * MAX_VIEW_DISTANCE
+		var ray_end = global_position + Vector2.RIGHT.rotated(angle) * max_view_distance
 		
 		# Cast ray to check for walls
 		var query = PhysicsRayQueryParameters2D.create(global_position, ray_end)
@@ -196,7 +168,6 @@ func update_animation(direction):
 		else:
 			$AnimatedSprite2D.play("up")
 			facing_direction = Vector2.UP
-
 
 func play_step_sound():
 	var animation = $AnimatedSprite2D.animation
